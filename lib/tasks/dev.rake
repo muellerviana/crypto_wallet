@@ -2,29 +2,20 @@ namespace :dev do
   desc "Configura o ambinente de desenvolvimento"
   task setup: :environment do
     if Rails.env.development?
-      spinner = TTY::Spinner.new("[:spinner] Deleting data-base")
-      spinner.auto_spin
-      %x(rails db:drop)
-      spinner.success('(Done!)')
-            
-      spinner = TTY::Spinner.new("[:spinner] Creating new data-base")
-      spinner.auto_spin
-      %x( db:create )
-      spinner.success('(Done!)')
-           
-      spinner = TTY::Spinner.new("[:spinner] Executing migrations")
-      spinner.auto_spin
-      %x(db:migrate )
-      spinner.success('(Done!)')
+      show_spinner("Apagando BD..."){%x(rails db:drop)}
+      show_spinner("Criando Bd..."){%x(rails db:create)}
+      show_spinner("Migrando BD..."){%x(rails db:migrate)}
+      show_spinner("Populando BD..."){%x(rails db:seed)}
+      else
+        puts "Você não está no ambiente de desenvolvimento!"
+      end
+    end
 
-      spinner = TTY::Spinner.new("[:spinner] Executind seed")
+    def show_spinner (msg_start, msg_end = "Concluído!")
+      spinner = TTY::Spinner.new("[:spinner] #{msg_start}")
       spinner.auto_spin
-      %x(db:seed)
-      spinner.success('(Done!)')
-            
-    else
-      puts "Você não está no ambiente de desenvolvimento!"
-    end 
-  end
+      yield
+      spinner.success("(#{msg_end})")
+    end
 
 end
